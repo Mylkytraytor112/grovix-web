@@ -1,555 +1,317 @@
-
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grovix - Encuentra tu mundo</title>
-    <link rel="icon" type="image/png" href="vector-illustration-alien-head-isolated-on-black-background-extraterrestrial-humanoid-face-icon-web-ui-element-vector.png">
-    <!-- Tailwind CSS para el estilizado rápido y premium -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grovix</title>
+    <!-- Tailwind CSS para diseño responsivo en móvil y web -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons para mantener la elegancia de interfaz de Grovix -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#111214',
+                        darkCard: '#1e1f22',
+                        darkAccent: '#2b2d31',
+                        darkHighlight: '#313338',
+                        grovixBlue: '#5865f2',
+                        grovixGreen: '#23a55a',
+                        grovixYellow: '#f0b232',
+                        grovixGray: '#80848e',
+                        grovixRed: '#f23f43'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Paleta ultra oscura premium inspirada en la web de Stoat */
+        /* Desactivar selecciones molestas para emular una app nativa en móvil */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            outline: none;
+        }
         body {
-            background-color: #0c0a12;
-            color: #e2e1e6;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #111214;
+            color: #f2f3f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            transition: background 0.3s ease;
         }
-        .bg-stoat-dark {
-            background-color: #15121f;
+        /* Transición suave para hojas de ajustes inferiores (Bottom Sheets) */
+        .bottom-sheet {
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .bg-stoat-card {
-            background-color: #191526;
+        .bottom-sheet.open {
+            transform: translateY(0);
         }
-        /* Patrón de cuadrícula de puntos idéntico al de tu imagen 1000087155.png */
-        .bg-dot-grid {
-            background-color: #111115;
-            background-image: radial-gradient(#33333a 1px, transparent 1.2px);
-            background-size: 16px 16px;
-        }
-        /* Sombras suaves de profundidad */
-        .stoat-shadow {
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-        }
-        /* Reset de scrollbars estéticas */
-        .no-scrollbar::-webkit-scrollbar {
+        .view {
             display: none;
+            height: 100%;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .view.active {
+            display: flex;
+            flex-direction: column;
+        }
+        .file-upload-input {
+            display: none;
         }
     </style>
 </head>
-<body class="min-h-screen selection:bg-white selection:text-black">
+<body class="w-full h-screen flex flex-col justify-between" id="app-body">
 
-    <!-- MENÚ SUPERIOR FLOTANTE ESTILO STOAT (Fiel a la captura 1000087151.png) -->
-    <header class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-lg bg-[#181524]/90 backdrop-blur-md border border-[#2b263f] rounded-full py-2.5 px-6 flex items-center justify-between shadow-2xl">
-        <div class="flex items-center gap-2">
-            <!-- Logo Alien Grovix de Alta Calidad -->
-            <div class="w-7 h-7 flex items-center justify-center">
-                <svg viewBox="0 0 100 100" class="w-full h-full fill-white" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Silueta del Alien de Grovix -->
-                    <path d="M50,15 C26,15 15,30 15,50 C15,63 21,73 31,81 C36,85 39,89 42,92 C45,95 47,97 50,97 C53,97 55,95 58,92 C61,89 64,85 69,81 C79,73 85,63 85,50 C85,30 74,15 50,15 Z M37,63 C31,63 27,55 29,48 C31,41 37,37 43,39 C49,41 49,50 45,56 C42,60 40,63 37,63 Z M63,63 C60,63 58,60 55,56 C51,50 51,41 57,39 C63,37 69,41 71,48 C73,55 69,63 63,63 Z" />
+    <!-- ================= PANTALLA DE INICIO DE SESIÓN (LOGIN) ================= -->
+    <div id="login-screen" style="display: none;" class="fixed inset-0 bg-[#111214] z-50 flex flex-col justify-between p-6">
+        <div class="flex-1 flex flex-col justify-center items-center">
+            <!-- Alien Logo de Grovix Oficial -->
+            <div class="w-24 h-24 bg-black rounded-3xl flex items-center justify-center shadow-2xl mb-6">
+                <svg viewBox="0 0 512 512" class="w-16 h-16 fill-current text-white">
+                    <path d="M256,70C160,70,110,150,110,240c0,85,45,145,95,175c20,12,30,25,35,35c8,15,12,22,16,22s8-7,16-22c5-10,15-23,35-35c50-30,95-90,95-175C362,150,312,70,256,70z" fill="white"/>
+                    <path d="M165,265c3.5-22,23.5-52,50-57c9-1.7,11.5,6.5,3.5,17.5c-15.5,21.5-44.5,43-50,43C166,268.5,164.5,267.5,165,265z" fill="#111214"/>
+                    <path d="M347,265c-3.5-22-23.5-52-50-57c-9-1.7-11.5,6.5-3.5,17.5c15.5,21.5,44.5,43,50,43C346,268.5,347.5,267.5,347,265z" fill="#111214"/>
                 </svg>
             </div>
-            <span class="font-bold text-sm tracking-wider text-white">Grovix</span>
-        </div>
-        
-        <!-- Enlaces directos de navegación -->
-        <nav class="flex items-center gap-4 text-xs font-semibold text-gray-300">
-            <a href="#descargar" class="hover:text-white transition-colors">Descargar</a>
-            <a href="mailto:donmarc150@gmail.com?subject=Soporte%20Grovix" class="hover:text-white transition-colors">Soporte</a>
-            <button onclick="showSupportAlert()" class="hover:text-white transition-colors">Apoyar</button>
-        </nav>
-    </header>
+            <h1 class="text-3xl font-extrabold text-white mb-1 tracking-tight">Grovix</h1>
+            <p class="text-gray-400 text-sm mb-8">Tu espacio gamer</p>
 
-    <!-- SECCIÓN HÉROE CENTRAL -->
-    <main class="relative pt-36 pb-12 px-4 flex flex-col items-center justify-center text-center overflow-hidden">
-        <!-- Luz de fondo sutil -->
-        <div class="absolute top-20 left-1/2 -translate-x-1/2 w-80 h-80 bg-purple-950/15 rounded-full blur-[110px] pointer-events-none"></div>
-
-        <div class="max-w-2xl mx-auto z-10">
-            <!-- Título Principal en Blanco Plano -->
-            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                Encuentra tu mundo.
-            </h1>
-            
-            <p class="mt-6 text-sm sm:text-base text-gray-400 max-w-lg mx-auto font-light leading-relaxed">
-                Grovix es la aplicación de chat de código abierto para amigos y comunidades que funciona tal como siempre deseaste. Actualmente <strong class="text-white">en desarrollo</strong> y disponible para plataforma <strong class="text-white">móvil y web</strong>.
-            </p>
-
-            <!-- Botones de Acción Estilo Stoat (Celeste y Gris Oscuro) -->
-            <div class="mt-8 flex flex-col sm:flex-row gap-3.5 justify-center items-center">
-                <a href="#descargar" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#24d2f5] hover:bg-[#1bb8d9] text-[#0c0a12] font-bold text-sm sm:text-base transition-transform active:scale-95 shadow-lg shadow-[#24d2f5]/15">
-                    Descargar
-                </a>
-                <a href="#simulador" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#242033] hover:bg-[#2f2a42] text-white font-medium text-sm sm:text-base border border-[#3b3552] transition-transform active:scale-95">
-                    Entrar en la Web
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <!-- MOCKUP ESTÁTICO DE VISUALIZACIÓN DE PANTALLA (Inalterable y Fiel a la captura 1000087154.jpg) -->
-    <section id="simulador" class="py-8 px-4 max-w-sm mx-auto relative z-10">
-        <!-- Contenedor estático del móvil -->
-        <div class="w-full bg-[#111116] rounded-[36px] border-4 border-[#2b2836] shadow-2xl overflow-hidden flex flex-col h-[600px]">
-            
-            <!-- Barra superior estética -->
-            <div class="h-6 bg-[#111116] px-5 flex items-center justify-between text-[9px] text-gray-500 font-bold select-none shrink-0">
-                <span>1:54 p. m.</span>
-                <div class="flex items-center gap-1">
-                    <i data-lucide="wifi" class="w-2.5 h-2.5"></i>
-                    <span>15%</span>
-                </div>
-            </div>
-
-            <!-- Cabecera de la Aplicación -->
-            <div class="px-4 py-3 flex items-center justify-between border-b border-[#1b1a21] shrink-0">
-                <h2 class="text-base font-extrabold text-white">Inicio</h2>
-                <i data-lucide="settings" class="w-4.5 h-4.5 text-gray-400"></i>
-            </div>
-
-            <!-- Contenido Principal Estático de Grovix -->
-            <div class="flex-1 overflow-y-auto p-3.5 space-y-4 no-scrollbar">
+            <div class="w-full max-w-xs">
+                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Correo Electrónico</label>
+                <input type="email" id="login-email-input" placeholder="tu@correo.com" class="w-full bg-[#1e1f22] text-white px-4 py-3 rounded-xl border border-transparent focus:border-grovixBlue outline-none text-sm transition-all mb-4">
                 
-                <!-- Notas & Amigos -->
-                <div class="grid grid-cols-2 gap-2.5">
-                    <!-- Tarjeta Notas -->
-                    <div class="bg-[#1b1a22] p-3 rounded-xl border border-[#272533] flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-blue-600/10 text-blue-400 flex items-center justify-center shrink-0">
-                            <i data-lucide="file-text" class="w-4.5 h-4.5"></i>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[11px] font-bold text-white leading-none">Notas</p>
-                            <p class="text-[9px] text-gray-500 mt-0.5">Tus apuntes</p>
-                        </div>
-                    </div>
-                    <!-- Tarjeta Amigos -->
-                    <div class="bg-[#1b1a22] p-3 rounded-xl border border-[#272533] flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-600/10 text-emerald-400 flex items-center justify-center shrink-0">
-                            <i data-lucide="users" class="w-4.5 h-4.5"></i>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[11px] font-bold text-white leading-none">Amigos</p>
-                            <p class="text-[9px] text-gray-500 mt-0.5">Ver lista</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Título Clanes -->
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider text-left">Mis Clanes</p>
-
-                <!-- Tarjetas de Clanes de la captura original (1000087154) -->
-                <div class="space-y-3">
-                    
-                    <!-- Clan 1: Jugadores de sombras -->
-                    <div class="bg-[#1a1923] p-3.5 rounded-xl border border-[#262534] text-left">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center font-bold text-white text-xs shrink-0 relative">
-                                <div class="absolute inset-1.5 border border-cyan-400 rounded-full"></div>
-                                J
-                            </div>
-                            <div>
-                                <h4 class="font-extrabold text-xs text-white">Jugadores de sombras</h4>
-                                <p class="text-[9px] text-gray-400">128 miembros · FPS</p>
-                            </div>
-                        </div>
-                        <div class="mt-2 flex items-center justify-between text-[10px] text-gray-400">
-                            <span># general</span>
-                            <span class="flex items-center gap-1"><i data-lucide="volume-2" class="w-3 h-3"></i> Hablar</span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mt-1.5 bg-black/15 p-1.5 rounded truncate">
-                            <span class="text-gray-300">GamerPro:</span> ¿listo para la clasificación?
-                        </p>
-                    </div>
-
-                    <!-- Clan 2: DevCraft -->
-                    <div class="bg-[#1a1923] p-3.5 rounded-xl border border-[#262534] text-left">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-lg bg-gradient-to-b from-cyan-600 to-sky-700 flex items-center justify-center font-bold text-white text-xs shrink-0 relative">
-                                <div class="absolute bottom-1 w-5 h-2 bg-amber-500 rounded-full"></div>
-                                D
-                            </div>
-                            <div>
-                                <h4 class="font-extrabold text-xs text-white">DevCraft</h4>
-                                <p class="text-[9px] text-gray-400">64 miembros · Sandbox</p>
-                            </div>
-                        </div>
-                        <div class="mt-2 flex items-center justify-between text-[10px] text-gray-400">
-                            <span># general</span>
-                            <span class="flex items-center gap-1"><i data-lucide="volume-2" class="w-3 h-3"></i> Hablar</span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mt-1.5 bg-black/15 p-1.5 rounded truncate">
-                            <span class="text-gray-300">Ana_Code:</span> subiendo el nuevo build...
-                        </p>
-                    </div>
-
-                    <!-- Clan 3: Jajaja Hispano -->
-                    <div class="bg-[#1a1923] p-3.5 rounded-xl border border-[#262534] text-left">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-800 to-blue-900 flex items-center justify-center font-bold text-white text-xs shrink-0 relative">
-                                <div class="absolute w-4 h-4 border border-yellow-500 rotate-45"></div>
-                                J
-                            </div>
-                            <div>
-                                <h4 class="font-extrabold text-xs text-white">Jajaja Hispano</h4>
-                                <p class="text-[9px] text-gray-400">512 miembros · MOBA</p>
-                            </div>
-                        </div>
-                        <div class="mt-2 flex items-center justify-between text-[10px] text-gray-400">
-                            <span># general</span>
-                            <span class="flex items-center gap-1"><i data-lucide="volume-2" class="w-3 h-3"></i> Hablar</span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mt-1.5 bg-black/15 p-1.5 rounded truncate">
-                            <span class="text-gray-300">DevMaster:</span> torneo el viernes a las 8
-                        </p>
-                    </div>
-
-                </div>
-
-                <!-- Botón de Descubrir clanes -->
-                <div class="w-full py-2.5 bg-[#17161e] border border-dashed border-gray-700 text-center text-xs font-bold text-gray-400 rounded-lg">
-                    + Descubrir más clanes
-                </div>
-
-            </div>
-
-            <!-- Navegador Inferior Estático -->
-            <div class="h-12 bg-[#0d0c11] border-t border-[#1a1922] grid grid-cols-4 items-center justify-center shrink-0">
-                <span class="text-sm font-bold text-indigo-400">#</span>
-                <i data-lucide="message-square" class="w-4 h-4 mx-auto text-gray-500"></i>
-                <i data-lucide="plus-circle" class="w-4 h-4 mx-auto text-gray-500"></i>
-                <i data-lucide="user" class="w-4 h-4 mx-auto text-gray-500"></i>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- SECCIÓN DE BENEFICIOS INSPIRADA COMPLETAMENTE EN LA WEB DE STOAT -->
-    <section class="py-16 px-4 max-w-5xl mx-auto relative z-10">
-        
-        <!-- Fila de Tarjetas Superiores Stoat (1000087151.png) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Tarjeta: Todo lo que necesitas -->
-            <div class="bg-stoat-card p-8 rounded-[28px] border border-[#2b263f] text-left">
-                <h3 class="text-xl sm:text-2xl font-bold text-white mb-4">Todo lo que necesitas...</h3>
-                <p class="text-sm text-gray-400 leading-relaxed">
-                    Todas las funciones que esperas en el siglo XXI están aquí. Servidores, canales estructurados, chat de voz con latencia reducida, uso compartido de archivos a máxima velocidad, compatibilidad con formato Markdown y todo lo demás.
-                </p>
-            </div>
-
-            <!-- Tarjeta: Y nada que no sepas -->
-            <div class="bg-stoat-card p-8 rounded-[28px] border border-[#2b263f] text-left">
-                <h3 class="text-xl sm:text-2xl font-bold text-white mb-4">...y nada que no sepas.</h3>
-                <p class="text-sm text-gray-400 leading-relaxed">
-                    Sin anuncios molestos, sin recopilación secreta de datos privados ni colaboraciones turbias. Sabemos perfectamente lo que no quieres ver en tu pantalla, tu comunidad tampoco lo quiere y nosotros tampoco.
-                </p>
-            </div>
-        </div>
-
-        <!-- Fila de Tarjetas Inferiores Stoat -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <!-- Tarjeta: Maneja decenas, maneja miles -->
-            <div class="bg-stoat-card p-8 rounded-[28px] border border-[#2b263f] text-left">
-                <h3 class="text-xl font-bold text-white mb-3">Maneja decenas, maneja miles.</h3>
-                <p class="text-sm text-gray-400 leading-relaxed">
-                    Ya sea que estés charlando tranquilamente con un par de amigos cercanos de tu escuela o coordinando clanes de juego masivos con miles de miembros concurrentes, Grovix rinde sin esfuerzo alguno.
-                </p>
-            </div>
-
-            <!-- Tarjeta: Las reglas son sencillas -->
-            <div class="bg-stoat-card p-8 rounded-[28px] border border-[#2b263f] text-left">
-                <h3 class="text-xl font-bold text-white mb-3">Las reglas son sencillas.</h3>
-                <p class="text-sm text-gray-400 leading-relaxed">
-                    Creemos firmemente en que tu comunidad te pertenece a ti y a nadie más. En Grovix no hay algoritmos dictando lo que puedes o no leer, ni censuras centralizadas de grandes corporativos.
-                </p>
-            </div>
-        </div>
-
-        <!-- Características Adicionales de la Captura 2 (1000087152.png) y Paleta Real (1000087155.png) -->
-        <div class="mt-20 space-y-20">
-            <!-- Fila 1: Temas con Recreación de Paleta Real de tu captura -->
-            <div class="flex flex-col lg:flex-row items-center gap-12 text-left">
-                <div class="lg:w-5/12 space-y-4">
-                    <div class="w-10 h-10 rounded-xl bg-[#242033] text-[#24d2f5] flex items-center justify-center">
-                        <i data-lucide="palette" class="w-5 h-5"></i>
-                    </div>
-                    <h3 class="text-xl sm:text-2xl font-extrabold text-white">La personalización del tema no provocará que te baneen.</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">
-                        Grovix incluye temas con un diseño minimalista y atractivo por defecto. Y si quieres ir un paso más allá, puedes descubrir creaciones increíbles o desarrollar la tuya usando estilos CSS si te gusta experimentar.
-                    </p>
-                </div>
-                
-                <!-- RECREACIÓN INTEGRAL DE LA IMAGEN DE PALETA ENVIADA (1000087155.png) -->
-                <div class="lg:w-7/12 w-full bg-dot-grid p-8 rounded-3xl border border-[#242033] shadow-inner select-none flex flex-col items-center">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8 w-full max-w-md">
-                        
-                        <!-- Reds -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5">
-                            <div class="flex flex-col items-center">
-                                <span class="w-5 h-5 rounded-full bg-[#ff0000] border-2 border-white shadow-md shadow-red-500/25"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    Reds
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos de Rojo -->
-                            <div class="flex h-5 rounded overflow-hidden w-full max-w-[150px] border border-black">
-                                <span class="flex-1 bg-[#ff0000]"></span>
-                                <span class="flex-1 bg-[#ffb5b5]"></span>
-                                <span class="flex-1 bg-[#ff8080]"></span>
-                                <span class="flex-1 bg-[#e65c5c]"></span>
-                                <span class="flex-1 bg-[#b33c3c]"></span>
-                                <span class="flex-1 bg-[#801a1a]"></span>
-                            </div>
-                        </div>
-
-                        <!-- Oranges -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5">
-                            <div class="flex flex-col items-center">
-                                <span class="w-5 h-5 rounded-full bg-[#ff8c00] border-2 border-white shadow-md shadow-orange-500/25"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    Oranges
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos de Naranja -->
-                            <div class="flex h-5 rounded overflow-hidden w-full max-w-[150px] border border-black">
-                                <span class="flex-1 bg-[#ff8c00]"></span>
-                                <span class="flex-1 bg-[#ffe4b5]"></span>
-                                <span class="flex-1 bg-[#f4a460]"></span>
-                                <span class="flex-1 bg-[#cd853f]"></span>
-                                <span class="flex-1 bg-[#a0522d]"></span>
-                                <span class="flex-1 bg-[#8b4513]"></span>
-                            </div>
-                        </div>
-
-                        <!-- Yellows -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5">
-                            <div class="flex flex-col items-center">
-                                <span class="w-5 h-5 rounded-full bg-[#ffff00] border-2 border-white shadow-md shadow-yellow-500/25"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    Yellows
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos de Amarillo -->
-                            <div class="flex h-5 rounded overflow-hidden w-full max-w-[150px] border border-black">
-                                <span class="flex-1 bg-[#ffff00]"></span>
-                                <span class="flex-1 bg-[#ffffe0]"></span>
-                                <span class="flex-1 bg-[#eee8aa]"></span>
-                                <span class="flex-1 bg-[#d6cf6b]"></span>
-                                <span class="flex-1 bg-[#a39a3f]"></span>
-                                <span class="flex-1 bg-[#756f1c]"></span>
-                            </div>
-                        </div>
-
-                        <!-- Greens -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5">
-                            <div class="flex flex-col items-center">
-                                <span class="w-5 h-5 rounded-full bg-[#00ff00] border-2 border-white shadow-md shadow-emerald-500/25"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    Greens
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos de Verde -->
-                            <div class="flex h-5 rounded overflow-hidden w-full max-w-[150px] border border-black">
-                                <span class="flex-1 bg-[#00ff00]"></span>
-                                <span class="flex-1 bg-[#b2ffb2]"></span>
-                                <span class="flex-1 bg-[#80ff80]"></span>
-                                <span class="flex-1 bg-[#4db84d]"></span>
-                                <span class="flex-1 bg-[#2e8b2e]"></span>
-                                <span class="flex-1 bg-[#1e5a1e]"></span>
-                            </div>
-                        </div>
-
-                        <!-- Blues -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5">
-                            <div class="flex flex-col items-center">
-                                <span class="w-5 h-5 rounded-full bg-[#0000ff] border-2 border-white shadow-md shadow-blue-500/25"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    Blues
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos de Azul -->
-                            <div class="flex h-5 rounded overflow-hidden w-full max-w-[150px] border border-black">
-                                <span class="flex-1 bg-[#0000ff]"></span>
-                                <span class="flex-1 bg-[#b2b2ff]"></span>
-                                <span class="flex-1 bg-[#8080ff]"></span>
-                                <span class="flex-1 bg-[#4d4db8]"></span>
-                                <span class="flex-1 bg-[#2e2e8b]"></span>
-                                <span class="flex-1 bg-[#1d1d5e]"></span>
-                            </div>
-                        </div>
-
-                        <!-- Purples -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5">
-                            <div class="flex flex-col items-center">
-                                <span class="w-5 h-5 rounded-full bg-[#bf00ff] border-2 border-white shadow-md shadow-purple-500/25"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    Purples
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos de Púrpura -->
-                            <div class="flex h-5 rounded overflow-hidden w-full max-w-[150px] border border-black">
-                                <span class="flex-1 bg-[#bf00ff]"></span>
-                                <span class="flex-1 bg-[#e6b3ff]"></span>
-                                <span class="flex-1 bg-[#cc66ff]"></span>
-                                <span class="flex-1 bg-[#9933cc]"></span>
-                                <span class="flex-1 bg-[#731a99]"></span>
-                                <span class="flex-1 bg-[#4d0066]"></span>
-                            </div>
-                        </div>
-
-                        <!-- BGW (Black Grey White) -->
-                        <div class="flex flex-col items-center sm:items-start gap-2.5 col-span-1 sm:col-span-2">
-                            <div class="flex flex-col items-center sm:items-start">
-                                <span class="w-5 h-5 rounded-full bg-white border-2 border-gray-400 shadow"></span>
-                                <!-- Etiqueta Apuntadora -->
-                                <div class="mt-1 relative px-2.5 py-0.5 bg-black border border-gray-600 rounded text-[10px] text-white font-mono flex items-center justify-center">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black border-t border-l border-gray-600 rotate-45"></div>
-                                    BGW
-                                </div>
-                            </div>
-                            <!-- Barra de Tonos Acromáticos -->
-                            <div class="flex h-5 rounded overflow-hidden w-[150px] border border-black">
-                                <span class="flex-1 bg-black"></span>
-                                <span class="flex-1 bg-gray-500"></span>
-                                <span class="flex-1 bg-white"></span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fila 2: Grupos de DM -->
-            <div class="flex flex-col md:flex-row-reverse items-center gap-8 text-left">
-                <div class="md:w-1/2 space-y-4">
-                    <div class="w-10 h-10 rounded-xl bg-[#242033] text-[#24d2f5] flex items-center justify-center">
-                        <i data-lucide="users-2" class="w-5 h-5"></i>
-                    </div>
-                    <h3 class="text-xl sm:text-2xl font-extrabold text-white">Grupos de DM que se adaptan a diferentes tamaños.</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">
-                        Los chats grupales privados en Grovix admiten hasta 150 participantes. Son perfectos para organizar proyectos pequeños de juego, unirte a llamadas de voz rápidas con compañeros o coordinar ideas con un equipo dedicado.
-                    </p>
-                </div>
-                <div class="md:w-1/2 w-full bg-[#120f1c] p-5 rounded-2xl border border-[#242033]">
-                    <p class="text-xs font-bold text-gray-400 mb-2">Canal Privado de Coordinación</p>
-                    <div class="flex gap-2.5">
-                        <span class="text-xs bg-[#242033] text-white px-2.5 py-1 rounded-full font-medium">User</span>
-                        <span class="text-xs bg-[#242033] text-white px-2.5 py-1 rounded-full font-medium">Developer</span>
-                        <span class="text-xs bg-[#242033] text-white px-2.5 py-1 rounded-full font-medium">GamerPro</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN DESCARGA FINAL -->
-    <section id="descargar" class="py-16 px-4 max-w-3xl mx-auto text-center relative z-10">
-        <div class="bg-[#15121f] rounded-[36px] p-8 sm:p-14 border border-[#2b263f] shadow-2xl">
-            <h2 class="text-2xl sm:text-4xl font-extrabold text-white">¿Listo para dar el paso?</h2>
-            <p class="text-xs sm:text-sm text-gray-400 mt-2 max-w-sm mx-auto">Únete hoy mismo a Grovix y empieza a construir tu mundo.</p>
-            
-            <div class="mt-8 flex flex-col sm:flex-row gap-3.5 justify-center max-w-md mx-auto">
-                <button onclick="showDownloadAlert('Móvil')" class="w-full sm:w-1/2 py-3 bg-white text-[#0c0a12] font-bold rounded-xl text-xs sm:text-sm hover:bg-gray-200 transition-colors">
-                    Descargar para Móvil
-                </button>
-                <button onclick="showDownloadAlert('Web')" class="w-full sm:w-1/2 py-3 bg-[#242033] text-white font-medium rounded-xl text-xs sm:text-sm border border-[#3b3552] hover:bg-[#2f2a42] transition-colors">
-                    Entrar en la Web
+                <button onclick="handleLogin()" class="w-full bg-grovixBlue text-white font-bold py-3 rounded-xl text-sm hover:bg-opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    Entrar <span>➔</span>
                 </button>
             </div>
         </div>
-    </section>
-
-    <!-- MODAL DE NOTIFICACIÓN DE APOYO / DESCARGAS -->
-    <div id="custom-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-[#181524] border border-[#2b263f] p-6 sm:p-8 rounded-[28px] max-w-sm w-full text-center shadow-2xl">
-            <div id="modal-icon-container" class="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
-                <!-- Se inserta dinámicamente -->
-            </div>
-            <h3 id="modal-title" class="text-lg font-bold text-white mb-2"></h3>
-            <p id="modal-description" class="text-xs text-gray-400 mb-6 leading-relaxed"></p>
-            <button onclick="closeCustomModal()" class="w-full bg-[#24d2f5] hover:bg-[#1bb8d9] text-[#0c0a12] font-extrabold py-2.5 rounded-xl text-xs transition-all">
-                Entendido
-            </button>
+        
+        <div class="text-center text-xs text-gray-500">
+            Al entrar, aceptas los términos de Grovix.<br>Estudios MD · v2.1.0
         </div>
     </div>
 
-    <!-- PIE DE PÁGINA (Footer con Créditos y año 2026) -->
-    <footer class="border-t border-[#1b172b] bg-[#09070e] py-12 px-4 text-center">
-        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-2">
-                <!-- Alien Logo Footer -->
-                <svg viewBox="0 0 100 100" class="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M50,15 C26,15 15,30 15,50 C15,63 21,73 31,81 C36,85 39,89 42,92 C45,95 47,97 50,97 C53,97 55,95 58,92 C61,89 64,85 69,81 C79,73 85,63 85,50 C85,30 74,15 50,15 Z M37,63 C31,63 27,55 29,48 C31,41 37,37 43,39 C49,41 49,50 45,56 C42,60 40,63 37,63 Z M63,63 C60,63 58,60 55,56 C51,50 51,41 57,39 C63,37 69,41 71,48 C73,55 69,63 63,63 Z" />
-                </svg>
-                <span class="font-extrabold text-xs tracking-wider text-white">GROVIX CHAT</span>
+
+    <!-- ================= CONTENEDOR PRINCIPAL DE LA APP ================= -->
+    <div class="flex-1 w-full overflow-hidden relative">
+
+        <!-- ================= VISTA 1: CLANES (Inicio / Lista de Clanes) ================= -->
+        <div id="view-clans" class="view active">
+            <!-- Header con Logo de Grovix -->
+            <div class="h-14 px-4 flex items-center justify-between border-b border-darkHighlight bg-darkCard sticky top-0 z-10">
+                <div class="flex items-center gap-2.5">
+                    <!-- Logo Grovix miniatura al lado de Inicio -->
+                    <svg viewBox="0 0 512 512" class="w-6 h-6 fill-current text-white">
+                        <path d="M256,70C160,70,110,150,110,240c0,85,45,145,95,175c20,12,30,25,35,35c8,15,12,22,16,22s8-7,16-22c5-10,15-23,35-35c50-30,95-90,95-175C362,150,312,70,256,70z" fill="white"/>
+                        <path d="M165,265c3.5-22,23.5-52,50-57c9-1.7,11.5,6.5,3.5,17.5c-15.5,21.5-44.5,43-50,43C166,268.5,164.5,267.5,165,265z" fill="#111214"/>
+                        <path d="M347,265c-3.5-22-23.5-52-50-57c-9-1.7-11.5,6.5-3.5,17.5c15.5,21.5,44.5,43,50,43C346,268.5,347.5,267.5,347,265z" fill="#111214"/>
+                    </svg>
+                    <span class="text-lg font-bold tracking-tight">Inicio</span>
+                </div>
+                <button onclick="openCreateClanModal()" class="text-xs bg-grovixBlue px-3 py-1.5 rounded-full font-semibold hover:bg-opacity-90 active:scale-95 transition">+ Crear clan</button>
             </div>
-            
-            <div class="text-xs text-gray-500 space-y-1 md:text-right text-center">
-                <p>&copy; 2026 Grovix. Todos los derechos reservados.</p>
-                <p class="text-gray-400">
-                    Los créditos de la creación de la aplicación y el desarrollo son de <strong class="text-white">MD Studios</strong>.
-                </p>
-                <p>
-                    Servidor oficial de soporte: <span class="text-white font-semibold">MD Community Grovix</span>.
-                </p>
+
+            <!-- Buscador -->
+            <div class="p-4 bg-darkCard border-b border-darkHighlight flex flex-col gap-3">
+                <div class="relative">
+                    <input type="text" id="search-clans" oninput="renderClans()" placeholder="Buscar clanes..." class="w-full bg-darkBg text-sm text-gray-200 pl-9 pr-4 py-2.5 rounded-lg border border-transparent focus:border-grovixBlue outline-none transition">
+                    <span class="absolute left-3 top-3 text-gray-500 text-sm">🔍</span>
+                </div>
+            </div>
+
+            <!-- Contenido / Lista de clanes creados -->
+            <div id="clans-list-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                <!-- Se rellena dinámicamente -->
             </div>
         </div>
-    </footer>
 
-    <!-- LÓGICA DE ICONOS Y MODALES -->
-    <script>
-        // Inicializar iconos estéticos de Lucide
-        lucide.createIcons();
 
-        const modal = document.getElementById('custom-modal');
-        const modalIconContainer = document.getElementById('modal-icon-container');
-        const modalTitle = document.getElementById('modal-title');
-        const modalDescription = document.getElementById('modal-description');
+        <!-- ================= VISTA INTERNA DEL CLAN (Canales de Texto y Voz) ================= -->
+        <div id="view-clan-dashboard" class="view">
+            <!-- Header de Clan -->
+            <div class="h-14 px-4 flex items-center justify-between border-b border-darkHighlight bg-darkCard sticky top-0 z-10">
+                <div class="flex items-center gap-2">
+                    <button onclick="switchView('clans')" class="text-gray-400 mr-2 text-lg">←</button>
+                    <div id="dash-clan-avatar" class="w-8 h-8 rounded-lg bg-grovixBlue flex items-center justify-center text-white font-bold text-sm">C</div>
+                    <span id="dash-clan-name" class="font-bold text-base truncate">Comunidad MD</span>
+                </div>
+                <button onclick="openClanSettings()" class="text-gray-400 hover:text-white p-2">⚙️</button>
+            </div>
 
-        // Mostrar aviso personalizado de apoyo
-        function showSupportAlert() {
-            modalIconContainer.className = "w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center bg-red-500/10 text-red-400";
-            modalIconContainer.innerHTML = `<i data-lucide="heart" class="w-6 h-6 animate-pulse"></i>`;
-            modalTitle.textContent = "Apoyar a Grovix";
-            modalDescription.textContent = "Aún no nos podrás apoyar económicamente con donaciones, pero agradecemos enormemente tu interés de ayudar al crecimiento del proyecto. ¡Muchas gracias!";
-            
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
+            <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+                <!-- Cabecera del Clan -->
+                <div class="bg-darkCard rounded-2xl border border-darkHighlight p-4 flex items-center gap-4">
+                    <div id="dash-banner-avatar" class="w-14 h-14 bg-grovixBlue rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-md">C</div>
+                    <div>
+                        <h2 id="dash-title-name" class="text-lg font-extrabold text-white">Comunidad MD</h2>
+                        <span id="dash-members-count" class="text-xs text-grovixGray font-semibold">1 miembro</span>
+                    </div>
+                </div>
 
-        // Mostrar aviso personalizado de descarga
-        function showDownloadAlert(platform) {
-            modalIconContainer.className = "w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center bg-[#24d2f5]/10 text-[#24d2f5]";
-            modalIconContainer.innerHTML = `<i data-lucide="download" class="w-6 h-6"></i>`;
-            modalTitle.textContent = "Preparando Descarga";
-            modalDescription.textContent = `Estamos procesando el paquete de Grovix para la plataforma ${platform}. Desarrollado con dedicación por MD Studios.`;
-            
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
+                <!-- Canales de Texto Interactivos -->
+                <div>
+                    <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1">Canales de texto</span>
+                    <div class="mt-2 bg-darkCard rounded-xl border border-darkHighlight overflow-hidden">
+                        <div onclick="openTextChannelChat('general')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400 text-lg">#</span>
+                                <span class="text-sm font-semibold">general</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                        <div onclick="openTextChannelChat('anuncios')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400 text-lg">#</span>
+                                <span class="text-sm font-semibold">anuncios</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                        <div onclick="openTextChannelChat('memes')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400 text-lg">#</span>
+                                <span class="text-sm font-semibold">memes</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                        <div onclick="openTextChannelChat('medios de comunicación')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400 text-lg">#</span>
+                                <span class="text-sm font-semibold">medios de comunicación</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                        <div onclick="openTextChannelChat('clips')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400 text-lg">#</span>
+                                <span class="text-sm font-semibold">clips</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                        <div onclick="openTextChannelChat('recursos')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400 text-lg">#</span>
+                                <span class="text-sm font-semibold">recursos</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                    </div>
+                </div>
 
-        function closeCustomModal() {
-            modal.classList.add('hidden');
-        }
-    </script>
-</body>
-</html>
+                <!-- Canales de Voz Interactivos -->
+                <div>
+                    <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1">Canales de voz</span>
+                    <div class="mt-2 bg-darkCard rounded-xl border border-darkHighlight overflow-hidden">
+                        <div onclick="showVoiceUnavailable('Hablar')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400">🔊</span>
+                                <span class="text-sm font-semibold">Hablar</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                        <div onclick="showVoiceUnavailable('Música')" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400">🔊</span>
+                                <span class="text-sm font-semibold">Música</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">➔</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-```
+
+        <!-- ================= VISTA: SALA DE CHAT EN CANALES DE TEXTO ================= -->
+        <div id="view-channel-chat" class="view">
+            <!-- Header de Chat del Canal -->
+            <div class="h-14 px-4 flex items-center gap-3 border-b border-darkHighlight bg-darkCard sticky top-0 z-10">
+                <button onclick="switchView('clan-dashboard')" class="text-gray-400 hover:text-white text-lg">←</button>
+                <span class="text-lg font-bold text-gray-400">#</span>
+                <span id="chat-channel-title" class="font-bold text-base text-white">general</span>
+            </div>
+
+            <!-- Área de Mensajes de Texto Compactos -->
+            <div id="channel-messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                <!-- Mensajes dinámicos persistentes -->
+            </div>
+
+            <!-- Caja de envío de texto -->
+            <div class="p-3 bg-darkCard border-t border-darkHighlight flex items-center gap-3">
+                <input type="text" id="channel-msg-input" placeholder="Enviar mensaje..." onkeypress="checkChatInputKeyPress(event)" class="flex-1 bg-darkBg text-sm text-gray-200 px-4 py-2.5 rounded-full border border-transparent focus:border-grovixBlue outline-none transition">
+                <button onclick="sendChannelMessage()" class="bg-grovixBlue text-white p-2.5 rounded-full hover:bg-opacity-90 active:scale-95 transition">
+                    <svg class="w-4 h-4 fill-current transform rotate-90" viewBox="0 0 20 20">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ================= VISTA CONFIGURACIÓN DEL CLAN (Ajustes) ================= -->
+        <div id="view-clan-settings" class="view">
+            <div class="h-14 px-4 flex items-center justify-between border-b border-darkHighlight bg-darkCard sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <button onclick="switchView('clan-dashboard')" class="text-gray-400 hover:text-white text-lg">←</button>
+                    <span class="text-lg font-bold">Configuración del clan</span>
+                </div>
+                <button onclick="switchView('clan-dashboard')" class="text-gray-400 hover:text-white p-2">⚙️</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+                <!-- Info Clan -->
+                <div class="flex items-center gap-4">
+                    <div id="set-clan-avatar" class="w-16 h-16 bg-grovixBlue rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-md">C</div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="set-clan-name" class="text-lg font-extrabold text-white">Comunidad MD</h2>
+                            <span id="set-clan-tag" class="text-xs bg-grovixBlue bg-opacity-25 text-grovixBlue border border-grovixBlue px-2 py-0.5 rounded-md font-extrabold">[ MDC ]</span>
+                        </div>
+                        <span id="set-clan-members" class="text-xs text-grovixGray font-semibold">1 miembro</span>
+                    </div>
+                </div>
+
+                <!-- Ajustes del Clan -->
+                <div class="bg-darkCard rounded-2xl border border-darkHighlight overflow-hidden">
+                    <div onclick="openClanProfileEdit()" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-grovixBlue text-lg">✏️</span>
+                            <div>
+                                <span class="text-sm font-bold block">Cambiar perfil y nombre</span>
+                                <span class="text-xs text-gray-400">Editar nombre, foto y descripción</span>
+                            </div>
+                        </div>
+                        <span class="text-gray-500 text-sm">➔</span>
+                    </div>
+                    <div onclick="shareClan()" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-grovixGreen text-lg">🔗</span>
+                            <div>
+                                <span class="text-sm font-bold block">Compartir clan</span>
+                                <span class="text-xs text-gray-400">Invita a otros a unirse</span>
+                            </div>
+                        </div>
+                        <span class="text-gray-500 text-sm">➔</span>
+                    </div>
+                    <div onclick="openClanRoles()" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-indigo-400 text-lg">🛡️</span>
+                            <div>
+                                <span class="text-sm font-bold block">Roles</span>
+                                <span class="text-xs text-gray-400">Gestionar roles del clan</span>
+                            </div>
+                        </div>
+                        <span class="text-gray-500 text-sm">➔</span>
+                    </div>
+                    <div onclick="openClanPeople()" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-emerald-400 text-lg">👥</span>
+                            <div>
+                                <span class="text-sm font-bold block">Personas</span>
+                                <span id="clan-people-subtext" class="text-xs text-gray-400">3 miembros</span>
+                            </div>
+                        </div>
+                        <span class="text-gray-500 text-sm">➔</span>
+                    </div>
+                    <div onclick="openClanEmojis()" class="flex items-center justify-between p-4 hover:bg-darkHighlight cursor-pointer border-b border-darkHighlight transition-all">
+     
