@@ -1,4 +1,4 @@
-**ChatYork**
+**ChatYok**
 
 Esta es una aplicación de chat en tiempo real desarrollada con React Native para dispositivos móviles (Android e iOS), Next.js para la interfaz web y la API, y Node.js para el backend. La aplicación ofrece una experiencia de mensajería fluida y con gran capacidad de respuesta, con comunicación en tiempo real y autenticación segura.
 
